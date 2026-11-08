@@ -1,0 +1,16 @@
+id,title,category,status,owner,dependencies,notes
+TASK-01,Transfer GitHub Organization owner rights,Admin,Done,Arjun Mehta,None,Transferred admin rights to Priya Sharma with mandatory 2FA
+TASK-02,Next.js frontend migration for hackathon portal,Engineering,In Progress,Priya Sharma,None,Migrate from legacy Django backend to Next.js on Vercel
+TASK-03,Setup Vercel auto-deploy pipeline for pull requests,DevOps,Done,Vikram Aditya,TASK-02,Configured GitHub Action workflow for preview deployments
+TASK-04,Audit and migrate Google Maps API billing account,Infra,Blocked,Priya Sharma,None,Need to transition GCP billing account from Arjun before graduation
+TASK-05,Reserve University Main Auditorium for HackSprint,Logistics,Done,Rohan Verma,None,Tentatively approved for Oct 10-11 by Dean of Student Affairs
+TASK-06,Finalize HackSprint 2026 sponsorship brochure,Design,In Progress,Sneha Patel,TASK-05,Tiered packages from Title to Bronze sponsor tiers
+TASK-07,Setup Discord webhook rate-limit queue,Engineering,Todo,Vikram Aditya,None,Implement exponential backoff queue to stop HTTP 429 errors
+TASK-08,Inventory 8 ESP32 hardware kits in club cupboard,Logistics,Done,Rohan Verma,None,Kits verified and stored in Lab Cabinet 3
+TASK-09,Quarterly financial balance sheet audit with Faculty,Finance,Done,Sneha Patel,None,Audit signed off by Faculty Advisor Dr. Raman Iyer
+TASK-10,Prepare Git and GitHub workshop interactive repository,Education,Todo,Priya Sharma,None,Interactive git branch simulation exercises for juniors
+TASK-11,Docker and Containerization workshop lab guide,Education,Todo,Vikram Aditya,None,Hands-on lab sheet for Ubuntu 24.04 lab environments
+TASK-12,Automate DNS failover and SSL renewals for codecraftclub.org,DevOps,Todo,,None,Crucial floating infrastructure task with no designated owner assigned
+TASK-13,Order event promotional badges and stickers,Marketing,Todo,Sneha Patel,None,Waiting for quotation approval before placing order
+TASK-14,Supabase attendance tracker keepalive cron job,DevOps,Done,Vikram Aditya,None,Prevents free tier Supabase database pausing after 7 days
+TASK-15,Draft mentor and judge invitation list for HackSprint,Logistics,Todo,Rohan Verma,TASK-05,Outreach to alumni working at top tech firms in Bengaluru

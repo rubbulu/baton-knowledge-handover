@@ -1,5 +1,0 @@
-[2026-10-28 10:14:02] Sarah Jenkins: We definitely need to switch the default timeout on the LLM adapter to 30s. Some large documents take longer to extract claims.
-[2026-10-28 10:16:45] Alex Rivera: Agreed. I will update the server env config. Also, remember that Sarah is the sole owner for the Gemini schema validator.
-[2026-10-29 14:02:11] Sarah Jenkins: We agreed in yesterday's standup that confidential quotes (passwords, PII, vendor rates) must never leave the Express server to incoming roles. Redaction must happen in the backend before sending the JSON response.
-[2026-10-30 09:22:15] Alex Rivera: The backup cron failed again last night because SQLite had a pending write lock from the test runner.
-[2026-11-01 16:40:00] Sarah Jenkins: For Round 2, let's keep the verification status logic simple: if a claim matches notes + chat, it's Verified; if it's only in one file, it's Single-source.

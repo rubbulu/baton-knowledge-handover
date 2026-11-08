@@ -1,0 +1,54 @@
+[2026-03-02 09:15:00] Arjun Mehta: Morning team! As you know, my final semester exams start next month, so we are accelerating the club handover.
+[2026-03-02 09:17:22] Priya Sharma: Morning Arjun! Excited and ready. Let's make sure nothing gets lost in the shuffle.
+[2026-03-02 09:18:40] Rohan Verma: Good morning everyone. We also need to lock down HackSprint dates before cultural fest books the hall.
+[2026-03-02 09:20:11] Sneha Patel: Welcome Priya! The ledger for the current financial semester is up to date in Drive.
+[2026-03-02 10:04:15] Vikram Aditya: Hey folks, will review AWS IAM policies today so we can cut down permissions.
+[2026-03-03 14:10:00] Arjun Mehta: Regarding the club website rewrite we discussed in Sunday's kickoff:
+[2026-03-03 14:11:32] Arjun Mehta: The consensus was solid: We decided to migrate the club registration and project showcase portal from Django to Next.js hosted on Vercel to handle traffic spikes during HackSprint.
+[2026-03-03 14:13:05] Priya Sharma: 100% on board with Next.js + Vercel. Django served us well, but cold starts and server maintenance were killing us during registration peak.
+[2026-03-03 14:15:20] Vikram Aditya: I can set up the GitHub Action to auto-deploy preview URLs for every pull request on Vercel.
+[2026-03-03 14:16:45] Sneha Patel: That'll make UI testing so much easier for the design team.
+[2026-03-04 11:00:12] Rohan Verma: Has anyone contacted the Dean's office regarding auditorium approval?
+[2026-03-04 11:02:40] Priya Sharma: Yes, Rohan. The letter is submitted. We just need Dr. Raman's counter-signature.
+[2026-03-04 11:05:19] Rohan Verma: Perfect, I will follow up with Dr. Raman after his 2 PM lecture.
+[2026-03-04 16:30:00] Vikram Aditya: Hey @Arjun, the Discord bot threw a bunch of 429 errors again during the workshop broadcast.
+[2026-03-04 16:32:10] Arjun Mehta: Yeah, that's a known pain point. Discord aggressively rate-limits when we spam channel webhooks all at once.
+[2026-03-04 16:34:00] Priya Sharma: We should queue announcements with exponential backoff instead of bursting. Adding a ticket for that.
+[2026-03-05 14:18:30] Vikram Aditya: Question regarding the campus navigation map widget on our site: who owns the billing account for the Google Maps API?
+[2026-03-05 14:22:10] Arjun Mehta: Just confirming, the Google Maps API key is on my personal GCP console and credit card, so whoever takes over needs to swap it before I lose university email access.
+[2026-03-05 14:24:05] Vikram Aditya: Got it, thanks Arjun. Let's make sure we move that over to the club billing account soon.
+[2026-03-05 15:10:45] Sneha Patel: Just a reminder: keep all GST bills for reimbursement submissions. Student affairs rejects non-GST invoices.
+[2026-03-06 10:00:15] Rohan Verma: Update from Dean's office: Auditorium is tentatively booked for Oct 10-11, 2026!
+[2026-03-06 10:02:50] Priya Sharma: Awesome news Rohan! That gives us 7 solid months to line up sponsors and mentor tracks.
+[2026-03-06 10:05:12] Sneha Patel: We need to draft the sponsorship brochure by end of this month.
+[2026-03-07 13:45:00] Arjun Mehta: Heads up: I'm transferring the GitHub Organization admin role to Priya today.
+[2026-03-07 13:48:20] Priya Sharma: Received the invitation email! Accepted and enabled mandatory 2FA across all org members.
+[2026-03-07 13:50:11] Vikram Aditya: Great call on 2FA enforcement.
+[2026-03-08 17:00:00] Arjun Mehta: Supabase free tier currently runs our attendance DB, but note that it pauses after 7 days of inactivity.
+[2026-03-08 17:02:15] Vikram Aditya: I wrote a tiny cron ping to keep the project active so it doesn't sleep.
+[2026-03-09 09:30:00] Rohan Verma: Hey team, we have 4 workshops planned for the upcoming dev sprint: Git, Docker, React, and Prompt Engineering.
+[2026-03-09 09:33:10] Priya Sharma: Who is taking the Docker session?
+[2026-03-09 09:34:40] Vikram Aditya: I can take Docker and basic containerization.
+[2026-03-09 09:36:00] Arjun Mehta: Priya, you should take Git/GitHub since incoming members need to learn PR workflows early.
+[2026-03-09 09:37:15] Priya Sharma: Sounds great, I'll prepare the interactive repo examples.
+[2026-03-10 14:00:25] Sneha Patel: Anyone know why the club bank statement showed a ₹500 deduction on March 1st?
+[2026-03-10 14:02:10] Arjun Mehta: That's the annual debit card maintenance charge from SBI. Happens every March.
+[2026-03-10 14:03:00] Sneha Patel: Ah okay, recording it under bank charges.
+[2026-03-11 11:20:00] Rohan Verma: Are we providing lunch for the 24-hour hackathon or only dinner and breakfast?
+[2026-03-11 11:22:30] Sneha Patel: Depends on sponsor intake. Budget currently covers dinner, midnight snacks, and morning breakfast.
+[2026-03-11 11:24:15] Priya Sharma: Let's keep lunch optional/bring-your-own unless we get a title sponsor tier.
+[2026-03-11 16:40:00] Vikram Aditya: Did we ever figure out who is managing the DNS records and SSL certs for codecraftclub.org?
+[2026-03-11 16:42:15] Arjun Mehta: The domain is on Namecheap, but nobody has configured automated DNS failover yet. That's a floating task.
+[2026-03-11 16:43:50] Priya Sharma: Let's log it on the task board so it doesn't fall through the cracks.
+[2026-03-12 10:15:00] Arjun Mehta: College lab computers are being upgraded to Ubuntu 24.04 next week.
+[2026-03-12 10:18:20] Vikram Aditya: That means our lab scripts won't break on outdated Python 3.8 anymore! Huge relief.
+[2026-03-12 12:05:00] Sneha Patel: Sent the revised balance sheet to Dr. Raman for quarterly audit.
+[2026-03-12 12:07:30] Priya Sharma: Thanks Sneha. You've been keeping our books super clean.
+[2026-03-13 15:30:00] Rohan Verma: Quick question on hardware hackathon track: do we have any Arduino/ESP32 kits left from last year?
+[2026-03-13 15:32:15] Arjun Mehta: There are 8 ESP32 microcontrollers in the club cupboard, key is in the lab drawer.
+[2026-03-13 15:35:00] Rohan Verma: Awesome, I will inventory them tomorrow morning.
+[2026-03-14 18:00:00] Priya Sharma: Meeting notes from today's sync are posted in Drive. Please review action items before Monday.
+[2026-03-14 18:02:10] Vikram Aditya: Reviewed. I will pick up the Vercel staging deployment task.
+[2026-03-14 18:05:40] Sneha Patel: Reviewed as well. All good on budget items.
+[2026-03-14 18:08:00] Arjun Mehta: Great momentum everyone. CodeCraft is in great hands with Priya leading the charge!
+[2026-03-14 18:10:15] Priya Sharma: Thanks Arjun! We won't let you down. Best of luck with your final semester project submissions!
