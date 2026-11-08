@@ -8,6 +8,13 @@ import { getDb } from './db.js';
 import { chunkSource } from './chunker.js';
 import { extractProjectClaims } from './pipeline/extract.js';
 import { verifyProjectClaims } from './pipeline/verify.js';
+import {
+  normalizeRole,
+  getAllowedLabelsForRole,
+  canRoleSeeLabel,
+  canSee,
+  filterOrRedactClaim
+} from './access.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -473,15 +480,36 @@ router.post('/projects/:id/reconstruct', async (req, res) => {
 });
 
 /**
+ * Helper to get normalized role from request header
+ */
+function getRole(req) {
+  return normalizeRole(req.headers['x-role'] || 'lead');
+}
+
+/**
+ * Middleware: Lead role required for review/approval operations
+ */
+function requireLead(req, res, next) {
+  const role = getRole(req);
+  if (role !== 'lead') {
+    return res.status(403).json({ error: 'Forbidden: Lead role required for this action' });
+  }
+  next();
+}
+
+/**
  * GET /api/projects/:id/timeline
  * Decisions and open discussions ordered chronologically by chunk timestamp.
- * Optional query: ?access_label=...
+ * Server-enforces access labels: restricted role only sees team chunks.
  */
 router.get('/projects/:id/timeline', (req, res) => {
   try {
     const { id } = req.params;
-    const { access_label } = req.query;
+    const role = getRole(req);
     const db = getDb();
+
+    const allowedLabels = getAllowedLabelsForRole(role);
+    const labelPlaceholders = allowedLabels.map(() => '?').join(',');
 
     let query = `
       SELECT c.id, c.source_id, c.author, c.timestamp, c.text, c.access_label, c.line_ref,
@@ -489,13 +517,9 @@ router.get('/projects/:id/timeline', (req, res) => {
       FROM chunks c
       JOIN sources s ON s.id = c.source_id
       WHERE s.project_id = ? AND c.timestamp IS NOT NULL AND c.timestamp != ''
+        AND c.access_label IN (${labelPlaceholders})
     `;
-    const params = [id];
-
-    if (access_label) {
-      query += ` AND c.access_label = ?`;
-      params.push(access_label);
-    }
+    const params = [id, ...allowedLabels];
 
     query += ` ORDER BY c.timestamp ASC, c.rowid ASC`;
 
@@ -526,6 +550,7 @@ router.get('/projects/:id/timeline', (req, res) => {
 
     res.json({
       projectId: id,
+      role,
       total: timeline.length,
       timeline
     });
@@ -536,11 +561,14 @@ router.get('/projects/:id/timeline', (req, res) => {
 
 /**
  * GET /api/projects/:id/claims
- * Returns claims for a project with their attached claim_evidence citations
+ * Returns claims for a project with role-based redaction enforced on server.
+ * If caller cannot see all supporting evidence, returns redacted placeholder:
+ *   { id, redacted: true, reason: "restricted" }
  */
 router.get('/projects/:id/claims', (req, res) => {
   try {
     const { id } = req.params;
+    const role = getRole(req);
     const db = getDb();
 
     const claims = db.prepare(`
@@ -572,6 +600,9 @@ router.get('/projects/:id/claims', (req, res) => {
       evidence: c.evidence_json ? JSON.parse(c.evidence_json) : []
     }));
 
+    // Server-side role-based claim & quote redaction
+    const roleFilteredClaims = formatted.map(c => filterOrRedactClaim(role, c));
+
     const summary = {
       total: formatted.length,
       verified: formatted.filter(c => c.status === 'Verified').length,
@@ -583,9 +614,453 @@ router.get('/projects/:id/claims', (req, res) => {
 
     res.json({
       projectId: id,
+      role,
       summary,
-      total: formatted.length,
-      claims: formatted
+      total: roleFilteredClaims.length,
+      claims: roleFilteredClaims
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * PATCH /api/claims/:id
+ * Edit claim text and/or owner (Lead role only)
+ */
+router.patch('/claims/:id', requireLead, (req, res) => {
+  try {
+    const { id } = req.params;
+    const { text, owner } = req.body;
+    const db = getDb();
+
+    const claim = db.prepare('SELECT * FROM claims WHERE id = ?').get(id);
+    if (!claim) {
+      return res.status(404).json({ error: 'Claim not found' });
+    }
+
+    const newText = text !== undefined ? String(text).trim() : claim.text;
+    const newOwner = owner !== undefined ? (owner ? String(owner).trim() : null) : claim.owner;
+
+    db.prepare(`
+      UPDATE claims
+      SET text = ?, owner = ?, updated_at = datetime('now')
+      WHERE id = ?
+    `).run(newText, newOwner, id);
+
+    db.prepare(`
+      INSERT INTO audit_log (id, project_id, action, actor, details, created_at)
+      VALUES (?, ?, 'claim_edited', 'lead', ?, datetime('now'))
+    `).run(
+      crypto.randomUUID(),
+      claim.project_id,
+      `Lead edited claim "${claim.id.substring(0, 8)}..."`
+    );
+
+    const updated = db.prepare('SELECT * FROM claims WHERE id = ?').get(id);
+    res.json({ message: 'Claim updated successfully', claim: updated });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * POST /api/claims/:id/reject
+ * Reject a claim (Lead role only)
+ */
+router.post('/claims/:id/reject', requireLead, (req, res) => {
+  try {
+    const { id } = req.params;
+    const { comment } = req.body || {};
+    const db = getDb();
+
+    const claim = db.prepare('SELECT * FROM claims WHERE id = ?').get(id);
+    if (!claim) {
+      return res.status(404).json({ error: 'Claim not found' });
+    }
+
+    db.prepare(`
+      UPDATE claims
+      SET review_state = 'rejected', updated_at = datetime('now')
+      WHERE id = ?
+    `).run(id);
+
+    db.prepare(`
+      INSERT INTO reviews (id, claim_id, reviewer, status_decision, comment, created_at)
+      VALUES (?, ?, 'lead', 'rejected', ?, datetime('now'))
+    `).run(crypto.randomUUID(), id, comment || null);
+
+    db.prepare(`
+      INSERT INTO audit_log (id, project_id, action, actor, details, created_at)
+      VALUES (?, ?, 'claim_rejected', 'lead', ?, datetime('now'))
+    `).run(
+      crypto.randomUUID(),
+      claim.project_id,
+      `Lead rejected claim "${claim.text.substring(0, 50)}..."`
+    );
+
+    res.json({ message: 'Claim rejected', claimId: id });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * POST /api/claims/:id/confirm
+ * Confirm and approve a claim (Lead role only)
+ */
+router.post('/claims/:id/confirm', requireLead, (req, res) => {
+  try {
+    const { id } = req.params;
+    const { comment } = req.body || {};
+    const db = getDb();
+
+    const claim = db.prepare('SELECT * FROM claims WHERE id = ?').get(id);
+    if (!claim) {
+      return res.status(404).json({ error: 'Claim not found' });
+    }
+
+    db.prepare(`
+      UPDATE claims
+      SET review_state = 'approved', updated_at = datetime('now')
+      WHERE id = ?
+    `).run(id);
+
+    db.prepare(`
+      INSERT INTO reviews (id, claim_id, reviewer, status_decision, comment, created_at)
+      VALUES (?, ?, 'lead', 'approved', ?, datetime('now'))
+    `).run(crypto.randomUUID(), id, comment || null);
+
+    db.prepare(`
+      INSERT INTO audit_log (id, project_id, action, actor, details, created_at)
+      VALUES (?, ?, 'claim_confirmed', 'lead', ?, datetime('now'))
+    `).run(
+      crypto.randomUUID(),
+      claim.project_id,
+      `Lead approved claim "${claim.text.substring(0, 50)}..."`
+    );
+
+    res.json({ message: 'Claim confirmed and approved', claimId: id });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * POST /api/claims/:id/resolve-conflict
+ * Resolve a conflicting claim by choosing which owner/evidence is right (Lead role only)
+ */
+router.post('/claims/:id/resolve-conflict', requireLead, (req, res) => {
+  try {
+    const { id } = req.params;
+    const { chosen_owner, chosen_evidence_id, resolution_note } = req.body || {};
+    const db = getDb();
+
+    const claim = db.prepare('SELECT * FROM claims WHERE id = ?').get(id);
+    if (!claim) {
+      return res.status(404).json({ error: 'Claim not found' });
+    }
+
+    const note = resolution_note || `Resolved by lead: chosen owner "${chosen_owner}"`;
+
+    db.prepare(`
+      UPDATE claims
+      SET owner = ?, status = 'Verified', review_state = 'approved', gap_note = ?, updated_at = datetime('now')
+      WHERE id = ?
+    `).run(chosen_owner || claim.owner, note, id);
+
+    db.prepare(`
+      INSERT INTO reviews (id, claim_id, reviewer, status_decision, comment, created_at)
+      VALUES (?, ?, 'lead', 'modified', ?, datetime('now'))
+    `).run(crypto.randomUUID(), id, note);
+
+    db.prepare(`
+      INSERT INTO audit_log (id, project_id, action, actor, details, created_at)
+      VALUES (?, ?, 'conflict_resolved', 'lead', ?, datetime('now'))
+    `).run(
+      crypto.randomUUID(),
+      claim.project_id,
+      `Lead resolved conflict on claim "${claim.id.substring(0, 8)}": ${note}`
+    );
+
+    const updated = db.prepare('SELECT * FROM claims WHERE id = ?').get(id);
+    res.json({ message: 'Conflict resolved successfully', claim: updated });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * POST /api/projects/:id/approve
+ * Lead approves the project handover, creating a version snapshot (Lead role only)
+ */
+router.post('/projects/:id/approve', requireLead, (req, res) => {
+  try {
+    const { id } = req.params;
+    const { approve_all = true } = req.body || {};
+    const db = getDb();
+
+    const project = db.prepare('SELECT * FROM projects WHERE id = ?').get(id);
+    if (!project) {
+      return res.status(404).json({ error: 'Project not found' });
+    }
+
+    // Automatically mark all pending claims as approved if approve_all is true
+    if (approve_all) {
+      db.prepare(`
+        UPDATE claims
+        SET review_state = 'approved', updated_at = datetime('now')
+        WHERE project_id = ? AND review_state = 'pending'
+      `).run(id);
+    }
+
+    // Fetch next version number
+    const verRow = db.prepare('SELECT COALESCE(MAX(version_num), 0) + 1 as next_ver FROM versions WHERE project_id = ?').get(id);
+    const nextVersion = verRow ? verRow.next_ver : 1;
+
+    // Fetch approved claims with evidence for snapshot
+    const approvedClaims = db.prepare(`
+      SELECT c.*,
+        (
+          SELECT json_group_array(
+            json_object(
+              'chunk_id', ce.chunk_id,
+              'quote', ce.quote,
+              'source_id', ch.source_id,
+              'source_name', s.name,
+              'author', ch.author,
+              'line_ref', ch.line_ref,
+              'access_label', ch.access_label
+            )
+          )
+          FROM claim_evidence ce
+          JOIN chunks ch ON ch.id = ce.chunk_id
+          JOIN sources s ON s.id = ch.source_id
+          WHERE ce.claim_id = c.id
+        ) as evidence_json
+      FROM claims c
+      WHERE c.project_id = ? AND c.review_state = 'approved'
+      ORDER BY c.type ASC, c.created_at ASC
+    `).all(id).map(c => ({
+      ...c,
+      evidence: c.evidence_json ? JSON.parse(c.evidence_json) : []
+    }));
+
+    const snapshotPayload = {
+      projectId: id,
+      version: nextVersion,
+      approvedAt: new Date().toISOString(),
+      approvedBy: 'lead',
+      claimsCount: approvedClaims.length,
+      claims: approvedClaims
+    };
+
+    const versionId = crypto.randomUUID();
+    db.prepare(`
+      INSERT INTO versions (id, project_id, version_num, snapshot_json, created_at)
+      VALUES (?, ?, ?, ?, datetime('now'))
+    `).run(versionId, id, nextVersion, JSON.stringify(snapshotPayload));
+
+    db.prepare(`
+      INSERT INTO audit_log (id, project_id, action, actor, details, created_at)
+      VALUES (?, ?, 'project_approved', 'lead', ?, datetime('now'))
+    `).run(
+      crypto.randomUUID(),
+      id,
+      `Lead approved handover snapshot v${nextVersion} with ${approvedClaims.length} approved claims`
+    );
+
+    res.json({
+      message: 'Project handover approved successfully',
+      version: nextVersion,
+      versionId,
+      approvedClaimsCount: approvedClaims.length
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * GET /api/projects/:id/handover
+ * Returns role-filtered approved claims grouped by type + code-generated next actions.
+ * Handover views show ONLY approved claims.
+ */
+router.get('/projects/:id/handover', (req, res) => {
+  try {
+    const { id } = req.params;
+    const role = getRole(req);
+    const db = getDb();
+
+    const project = db.prepare('SELECT * FROM projects WHERE id = ?').get(id);
+    if (!project) {
+      return res.status(404).json({ error: 'Project not found' });
+    }
+
+    // Latest version
+    const latestVersionRow = db.prepare('SELECT MAX(version_num) as ver FROM versions WHERE project_id = ?').get(id);
+    const currentVersion = latestVersionRow ? latestVersionRow.ver : null;
+
+    // Handover views show ONLY approved claims
+    const approvedClaims = db.prepare(`
+      SELECT c.*,
+        (
+          SELECT json_group_array(
+            json_object(
+              'chunk_id', ce.chunk_id,
+              'quote', ce.quote,
+              'source_id', ch.source_id,
+              'source_name', s.name,
+              'author', ch.author,
+              'line_ref', ch.line_ref,
+              'access_label', ch.access_label
+            )
+          )
+          FROM claim_evidence ce
+          JOIN chunks ch ON ch.id = ce.chunk_id
+          JOIN sources s ON s.id = ch.source_id
+          WHERE ce.claim_id = c.id
+        ) as evidence_json
+      FROM claims c
+      WHERE c.project_id = ? AND c.review_state = 'approved'
+      ORDER BY c.created_at ASC
+    `).all(id).map(c => ({
+      ...c,
+      evidence: c.evidence_json ? JSON.parse(c.evidence_json) : []
+    }));
+
+    // Server-side role-based claim & quote redaction
+    const roleClaims = approvedClaims.map(c => filterOrRedactClaim(role, c));
+
+    // Group approved claims
+    const groups = {
+      decisions: [],
+      owners: [],
+      tasks: [],
+      dependencies: [],
+      risks: [],
+      recurring_problems: []
+    };
+
+    roleClaims.forEach(c => {
+      if (c.redacted) {
+        // Redacted claims are categorized by their underlying type if preserved or decisions
+        const underlying = approvedClaims.find(raw => raw.id === c.id);
+        const targetGroup = underlying?.type === 'recurring_problem' ? 'recurring_problems' : `${underlying?.type || 'decision'}s`;
+        if (groups[targetGroup]) {
+          groups[targetGroup].push(c);
+        } else {
+          groups.decisions.push(c);
+        }
+      } else {
+        const key = c.type === 'recurring_problem' ? 'recurring_problems' : `${c.type}s`;
+        if (groups[key]) {
+          groups[key].push(c);
+        } else {
+          groups.decisions.push(c);
+        }
+      }
+    });
+
+    // Generate code-ruled "Next Actions"
+    // Open tasks + Missing items + Conflicting items
+    const nextActions = [];
+
+    roleClaims.forEach(c => {
+      if (c.redacted) {
+        // Never leak secrets in next_actions
+        return;
+      }
+
+      if (c.type === 'task') {
+        nextActions.push({
+          claim_id: c.id,
+          type: 'task',
+          priority: c.status === 'Missing' ? 'High' : 'Medium',
+          action: `Complete task: ${c.text}`,
+          owner: c.owner || 'Needs Assignee',
+          status: c.status
+        });
+      }
+
+      if (c.status === 'Missing' && c.type !== 'task') {
+        nextActions.push({
+          claim_id: c.id,
+          type: 'gap',
+          priority: 'High',
+          action: `Resolve gap: ${c.text}`,
+          reason: c.gap_note || 'Missing required owner or contact point',
+          owner: c.owner || 'Unassigned'
+        });
+      }
+
+      if (c.status === 'Conflicting') {
+        nextActions.push({
+          claim_id: c.id,
+          type: 'conflict',
+          priority: 'Urgent',
+          action: `Resolve ownership conflict: ${c.text}`,
+          reason: c.gap_note || 'Conflicting owners found across independent sources',
+          owner: c.owner || 'Contested'
+        });
+      }
+    });
+
+    res.json({
+      projectId: id,
+      projectName: project.name,
+      role,
+      version: currentVersion,
+      totalApproved: roleClaims.length,
+      groups,
+      next_actions: nextActions
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * POST /api/projects/:id/acknowledge
+ * Records who acknowledged which version and when
+ */
+router.post('/projects/:id/acknowledge', (req, res) => {
+  try {
+    const { id } = req.params;
+    const role = req.headers['x-role'] || req.body.user_role || 'incoming';
+    const { version_num, notes } = req.body || {};
+    const db = getDb();
+
+    const project = db.prepare('SELECT id FROM projects WHERE id = ?').get(id);
+    if (!project) {
+      return res.status(404).json({ error: 'Project not found' });
+    }
+
+    const ackId = crypto.randomUUID();
+    const ackNotes = notes ? String(notes).trim() : `Handover acknowledged by ${role} role (version ${version_num || 'latest'})`;
+
+    db.prepare(`
+      INSERT INTO acknowledgements (id, project_id, user_role, acknowledged_at, notes)
+      VALUES (?, ?, ?, datetime('now'), ?)
+    `).run(ackId, id, role, ackNotes);
+
+    db.prepare(`
+      INSERT INTO audit_log (id, project_id, action, actor, details, created_at)
+      VALUES (?, ?, 'handover_acknowledged', ?, ?, datetime('now'))
+    `).run(
+      crypto.randomUUID(),
+      id,
+      role,
+      `Role "${role}" acknowledged handover version ${version_num || 'latest'}`
+    );
+
+    res.json({
+      message: 'Handover acknowledged successfully',
+      acknowledgementId: ackId,
+      projectId: id,
+      user_role: role,
+      version_num: version_num || 'latest',
+      acknowledged_at: new Date().toISOString()
     });
   } catch (err) {
     res.status(500).json({ error: err.message });
