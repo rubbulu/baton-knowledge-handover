@@ -1,0 +1,6 @@
+id,title,category,status,owner,dependencies,notes
+TASK-101,Implement SQLite database schema,Task,Done,Sarah Jenkins,None,Schema initialized using better-sqlite3
+TASK-102,Role-based redaction engine,Task,In Progress,Sarah Jenkins,TASK-101,Redacts confidential quotes on server
+TASK-103,Automate backup cron script,Task,Blocked,Alex Rivera,TASK-101,Blocked by SQLite file lock during nightly tests
+TASK-104,Sanitize Windows CRLF in CSV parser,Task,Todo,Alex Rivera,None,Recurring problem reported in notes
+TASK-105,Gemini LLM claim extraction adapter,Task,Done,Sarah Jenkins,None,Extracts decisions risks owners tasks
