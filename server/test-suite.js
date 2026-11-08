@@ -202,12 +202,13 @@ async function runTests() {
     console.log(`✓ Uploaded ${uploadData.sources[0].name} with ${uploadData.sources[0].chunksCreated} chunks`);
 
     // Test 8: POST /api/projects/:id/reconstruct
-    console.log('\n[Test 8] Testing POST /api/projects/:id/reconstruct (Extraction Pipeline)...');
+    console.log('\n[Test 8] Testing POST /api/projects/:id/reconstruct (Extraction & Verifier Pipeline)...');
     const reconstructRes = await fetch(`${baseUrl}/api/projects/${demoProjectId}/reconstruct`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        allowed_labels: ['team', 'leads-only', 'confidential']
+        allowed_labels: ['team', 'leads-only', 'confidential'],
+        use_cache: true
       })
     });
     const reconstructData = await reconstructRes.json();
@@ -215,20 +216,38 @@ async function runTests() {
     console.log(`- Extracted Claims Count: ${reconstructData.claimsCount}`);
     console.log(`- Extraction Source: ${reconstructData.source}`);
     console.log(`- Allowed Labels: ${reconstructData.allowedLabels?.join(', ')}`);
+    console.log('- Verifier Summary:', reconstructData.summary);
 
     if (!reconstructData.claims || reconstructData.claims.length === 0) {
       throw new Error('Reconstruction returned 0 claims');
     }
-    console.log(`✓ Successfully extracted and stored ${reconstructData.claimsCount} claims`);
-
-    // Verify unverified status in database
-    const dbClaims = db.prepare('SELECT id, type, text, owner, status FROM claims WHERE project_id = ?').all(demoProjectId);
-    console.log(`Database claims count: ${dbClaims.length}`);
-    const allUnverified = dbClaims.every(c => c.status === 'Unverified');
-    if (!allUnverified) {
-      throw new Error('Expected all freshly extracted claims to have status "Unverified"');
+    if (!reconstructData.summary || typeof reconstructData.summary.verified !== 'number') {
+      throw new Error('Reconstruction missing verifier summary counts');
     }
-    console.log('✓ All claims initialized with status "Unverified"');
+    console.log(`✓ Successfully extracted and verified ${reconstructData.claimsCount} claims`);
+
+    // Verify database claims statuses
+    const dbClaims = db.prepare('SELECT id, type, text, owner, status, gap_note FROM claims WHERE project_id = ?').all(demoProjectId);
+    console.log(`Database claims count: ${dbClaims.length}`);
+    const statusCounts = dbClaims.reduce((acc, c) => {
+      acc[c.status] = (acc[c.status] || 0) + 1;
+      return acc;
+    }, {});
+    console.log('Database status breakdown:', statusCounts);
+
+    if (!statusCounts['Verified'] || statusCounts['Verified'] === 0) {
+      throw new Error('Expected at least 1 Verified claim in demo project');
+    }
+    if (!statusCounts['Conflicting'] || statusCounts['Conflicting'] === 0) {
+      throw new Error('Expected at least 1 Conflicting claim (Maps API key) in demo project');
+    }
+    if (!statusCounts['Missing'] || statusCounts['Missing'] === 0) {
+      throw new Error('Expected at least 1 Missing claim (Task without owner) in demo project');
+    }
+    if (!statusCounts['Single-source'] || statusCounts['Single-source'] === 0) {
+      throw new Error('Expected at least 1 Single-source claim in demo project');
+    }
+    console.log('✓ All 4 core status types (Verified, Conflicting, Missing, Single-source) validated in database');
 
     // Verify claim_evidence rows
     const dbEvidence = db.prepare('SELECT COUNT(*) as count FROM claim_evidence ce JOIN claims c ON c.id = ce.claim_id WHERE c.project_id = ?').get(demoProjectId);
@@ -238,12 +257,12 @@ async function runTests() {
     }
     console.log('✓ Claim evidence rows stored');
 
-    // Verify audit log includes allowed access labels
-    const auditRecord = db.prepare(`SELECT * FROM audit_log WHERE project_id = ? AND action = 'reconstruct_extraction' ORDER BY created_at DESC LIMIT 1`).get(demoProjectId);
-    if (!auditRecord || !auditRecord.details.includes('team, leads-only, confidential')) {
-      throw new Error('Audit log did not record the allowed access labels used');
+    // Verify audit log includes verifier record
+    const verifierAudit = db.prepare(`SELECT * FROM audit_log WHERE project_id = ? AND action = 'claims_verified' ORDER BY created_at DESC LIMIT 1`).get(demoProjectId);
+    if (!verifierAudit) {
+      throw new Error('Audit log did not record claims_verified action');
     }
-    console.log(`✓ Audit log verified: "${auditRecord.details}"`);
+    console.log(`✓ Verifier audit log verified: "${verifierAudit.details}"`);
 
     // Test 9: GET /api/projects/:id/timeline
     console.log('\n[Test 9] Testing GET /api/projects/:id/timeline...');

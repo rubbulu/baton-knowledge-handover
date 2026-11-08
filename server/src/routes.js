@@ -7,6 +7,7 @@ import { fileURLToPath } from 'url';
 import { getDb } from './db.js';
 import { chunkSource } from './chunker.js';
 import { extractProjectClaims } from './pipeline/extract.js';
+import { verifyProjectClaims } from './pipeline/verify.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -438,28 +439,32 @@ async function handleLoadDemo(req, res) {
 
 /**
  * POST /api/projects/:id/reconstruct
- * Runs extraction and stores unverified claims plus claim_evidence rows.
- * Optional body: { allowed_labels: ['team', 'leads-only', 'confidential'], use_cache: boolean, batch_size: number }
+ * Runs extraction and automatically executes the deterministic verifier.
+ * Stores verified/conflicting/single-source/missing/unverified claims plus evidence and status summary.
  */
 router.post('/projects/:id/reconstruct', async (req, res) => {
   try {
     const { id } = req.params;
     const { allowed_labels, use_cache, batch_size } = req.body || {};
 
-    const result = await extractProjectClaims(id, {
+    const extractResult = await extractProjectClaims(id, {
       allowedLabels: allowed_labels,
       useCache: use_cache,
       batchSize: batch_size
     });
 
+    // Run deterministic plain-code verifier automatically
+    const verification = verifyProjectClaims(id);
+
     res.json({
-      message: 'Reconstruction complete',
+      message: 'Reconstruction and verification complete',
       projectId: id,
-      claimsCount: result.totalExtracted,
-      source: result.source,
-      allowedLabels: result.allowedLabels,
-      totalChunksAnalyzed: result.totalChunksAnalyzed,
-      claims: result.claims
+      claimsCount: verification.total,
+      source: extractResult.source,
+      allowedLabels: extractResult.allowedLabels,
+      totalChunksAnalyzed: extractResult.totalChunksAnalyzed,
+      summary: verification.summary,
+      claims: verification.claims
     });
   } catch (err) {
     console.error('[Reconstruct Error]', err);
@@ -567,8 +572,18 @@ router.get('/projects/:id/claims', (req, res) => {
       evidence: c.evidence_json ? JSON.parse(c.evidence_json) : []
     }));
 
+    const summary = {
+      total: formatted.length,
+      verified: formatted.filter(c => c.status === 'Verified').length,
+      single_source: formatted.filter(c => c.status === 'Single-source').length,
+      conflicting: formatted.filter(c => c.status === 'Conflicting').length,
+      missing: formatted.filter(c => c.status === 'Missing').length,
+      unverified: formatted.filter(c => c.status === 'Unverified').length
+    };
+
     res.json({
       projectId: id,
+      summary,
       total: formatted.length,
       claims: formatted
     });

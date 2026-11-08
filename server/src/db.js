@@ -145,6 +145,7 @@ function initTables(db) {
       status TEXT NOT NULL DEFAULT 'Unverified',
       review_state TEXT NOT NULL DEFAULT 'pending',
       version INTEGER DEFAULT 1,
+      gap_note TEXT,
       created_at TEXT DEFAULT (datetime('now')),
       updated_at TEXT DEFAULT (datetime('now'))
     );
@@ -201,6 +202,13 @@ function initTables(db) {
     CREATE INDEX IF NOT EXISTS idx_audit_log_project_id ON audit_log(project_id);
     CREATE INDEX IF NOT EXISTS idx_acknowledgements_project_id ON acknowledgements(project_id);
   `);
+
+  // Ensure gap_note column exists if table was created in prior schema
+  try {
+    db.exec('ALTER TABLE claims ADD COLUMN gap_note TEXT;');
+  } catch (e) {
+    // Column already exists
+  }
 }
 
 export function getDbType() {
