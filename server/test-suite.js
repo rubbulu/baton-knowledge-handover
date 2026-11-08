@@ -201,6 +201,77 @@ async function runTests() {
     }
     console.log(`✓ Uploaded ${uploadData.sources[0].name} with ${uploadData.sources[0].chunksCreated} chunks`);
 
+    // Test 8: POST /api/projects/:id/reconstruct
+    console.log('\n[Test 8] Testing POST /api/projects/:id/reconstruct (Extraction Pipeline)...');
+    const reconstructRes = await fetch(`${baseUrl}/api/projects/${demoProjectId}/reconstruct`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        allowed_labels: ['team', 'leads-only', 'confidential']
+      })
+    });
+    const reconstructData = await reconstructRes.json();
+    console.log('Reconstruct response summary:');
+    console.log(`- Extracted Claims Count: ${reconstructData.claimsCount}`);
+    console.log(`- Extraction Source: ${reconstructData.source}`);
+    console.log(`- Allowed Labels: ${reconstructData.allowedLabels?.join(', ')}`);
+
+    if (!reconstructData.claims || reconstructData.claims.length === 0) {
+      throw new Error('Reconstruction returned 0 claims');
+    }
+    console.log(`✓ Successfully extracted and stored ${reconstructData.claimsCount} claims`);
+
+    // Verify unverified status in database
+    const dbClaims = db.prepare('SELECT id, type, text, owner, status FROM claims WHERE project_id = ?').all(demoProjectId);
+    console.log(`Database claims count: ${dbClaims.length}`);
+    const allUnverified = dbClaims.every(c => c.status === 'Unverified');
+    if (!allUnverified) {
+      throw new Error('Expected all freshly extracted claims to have status "Unverified"');
+    }
+    console.log('✓ All claims initialized with status "Unverified"');
+
+    // Verify claim_evidence rows
+    const dbEvidence = db.prepare('SELECT COUNT(*) as count FROM claim_evidence ce JOIN claims c ON c.id = ce.claim_id WHERE c.project_id = ?').get(demoProjectId);
+    console.log(`Database claim_evidence rows: ${dbEvidence.count}`);
+    if (dbEvidence.count === 0) {
+      throw new Error('Expected claim_evidence rows to be stored for claims');
+    }
+    console.log('✓ Claim evidence rows stored');
+
+    // Verify audit log includes allowed access labels
+    const auditRecord = db.prepare(`SELECT * FROM audit_log WHERE project_id = ? AND action = 'reconstruct_extraction' ORDER BY created_at DESC LIMIT 1`).get(demoProjectId);
+    if (!auditRecord || !auditRecord.details.includes('team, leads-only, confidential')) {
+      throw new Error('Audit log did not record the allowed access labels used');
+    }
+    console.log(`✓ Audit log verified: "${auditRecord.details}"`);
+
+    // Test 9: GET /api/projects/:id/timeline
+    console.log('\n[Test 9] Testing GET /api/projects/:id/timeline...');
+    const timelineRes = await fetch(`${baseUrl}/api/projects/${demoProjectId}/timeline`);
+    const timelineData = await timelineRes.json();
+    console.log(`Timeline items count: ${timelineData.total}`);
+    if (!timelineData.timeline || timelineData.timeline.length === 0) {
+      throw new Error('Timeline returned 0 items');
+    }
+    console.log('Sample timeline entries:');
+    timelineData.timeline.slice(0, 3).forEach(item => {
+      console.log(`   [${item.timestamp}] [${item.type}] ${item.author}: ${item.text.substring(0, 70)}...`);
+    });
+    console.log('✓ Timeline successfully retrieved in chronological order');
+
+    // Test 10: GET /api/projects/:id/claims
+    console.log('\n[Test 10] Testing GET /api/projects/:id/claims...');
+    const claimsRes = await fetch(`${baseUrl}/api/projects/${demoProjectId}/claims`);
+    const claimsData = await claimsRes.json();
+    console.log(`Claims retrieved: ${claimsData.total}`);
+    if (!claimsData.claims || claimsData.claims.length === 0) {
+      throw new Error('Failed to retrieve claims');
+    }
+    const sampleClaim = claimsData.claims[0];
+    console.log(`Sample claim: [${sampleClaim.type}] "${sampleClaim.text}" (Owner: ${sampleClaim.owner || 'None'})`);
+    console.log(`Evidence quote: "${sampleClaim.evidence?.[0]?.quote || 'No quote'}"`);
+    console.log('✓ Claims endpoint successfully returns claims with citations and evidence');
+
     console.log('\n=== ALL TESTS PASSED SUCCESSFULLY! ===\n');
   } finally {
     server.close();

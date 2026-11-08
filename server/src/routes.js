@@ -6,6 +6,7 @@ import fs from 'fs';
 import { fileURLToPath } from 'url';
 import { getDb } from './db.js';
 import { chunkSource } from './chunker.js';
+import { extractProjectClaims } from './pipeline/extract.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -434,6 +435,147 @@ async function handleLoadDemo(req, res) {
     res.status(500).json({ error: err.message });
   }
 }
+
+/**
+ * POST /api/projects/:id/reconstruct
+ * Runs extraction and stores unverified claims plus claim_evidence rows.
+ * Optional body: { allowed_labels: ['team', 'leads-only', 'confidential'], use_cache: boolean, batch_size: number }
+ */
+router.post('/projects/:id/reconstruct', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { allowed_labels, use_cache, batch_size } = req.body || {};
+
+    const result = await extractProjectClaims(id, {
+      allowedLabels: allowed_labels,
+      useCache: use_cache,
+      batchSize: batch_size
+    });
+
+    res.json({
+      message: 'Reconstruction complete',
+      projectId: id,
+      claimsCount: result.totalExtracted,
+      source: result.source,
+      allowedLabels: result.allowedLabels,
+      totalChunksAnalyzed: result.totalChunksAnalyzed,
+      claims: result.claims
+    });
+  } catch (err) {
+    console.error('[Reconstruct Error]', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * GET /api/projects/:id/timeline
+ * Decisions and open discussions ordered chronologically by chunk timestamp.
+ * Optional query: ?access_label=...
+ */
+router.get('/projects/:id/timeline', (req, res) => {
+  try {
+    const { id } = req.params;
+    const { access_label } = req.query;
+    const db = getDb();
+
+    let query = `
+      SELECT c.id, c.source_id, c.author, c.timestamp, c.text, c.access_label, c.line_ref,
+             s.name as source_name, s.type as source_type
+      FROM chunks c
+      JOIN sources s ON s.id = c.source_id
+      WHERE s.project_id = ? AND c.timestamp IS NOT NULL AND c.timestamp != ''
+    `;
+    const params = [id];
+
+    if (access_label) {
+      query += ` AND c.access_label = ?`;
+      params.push(access_label);
+    }
+
+    query += ` ORDER BY c.timestamp ASC, c.rowid ASC`;
+
+    const chunks = db.prepare(query).all(...params);
+
+    const timeline = chunks.map(chunk => {
+      let itemType = 'discussion';
+      const lower = chunk.text.toLowerCase();
+      if (lower.includes('decision:') || lower.includes('decided') || lower.includes('consensus')) {
+        itemType = 'decision';
+      } else if (chunk.source_type === 'notes') {
+        itemType = 'meeting';
+      } else if (chunk.source_type === 'tasks') {
+        itemType = 'task';
+      }
+
+      return {
+        id: chunk.id,
+        timestamp: chunk.timestamp,
+        author: chunk.author || 'Team',
+        type: itemType,
+        text: chunk.text,
+        source: chunk.source_name,
+        line_ref: chunk.line_ref,
+        access_label: chunk.access_label
+      };
+    });
+
+    res.json({
+      projectId: id,
+      total: timeline.length,
+      timeline
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * GET /api/projects/:id/claims
+ * Returns claims for a project with their attached claim_evidence citations
+ */
+router.get('/projects/:id/claims', (req, res) => {
+  try {
+    const { id } = req.params;
+    const db = getDb();
+
+    const claims = db.prepare(`
+      SELECT c.*,
+        (
+          SELECT json_group_array(
+            json_object(
+              'chunk_id', ce.chunk_id,
+              'quote', ce.quote,
+              'source_id', ch.source_id,
+              'source_name', s.name,
+              'author', ch.author,
+              'line_ref', ch.line_ref,
+              'access_label', ch.access_label
+            )
+          )
+          FROM claim_evidence ce
+          JOIN chunks ch ON ch.id = ce.chunk_id
+          JOIN sources s ON s.id = ch.source_id
+          WHERE ce.claim_id = c.id
+        ) as evidence_json
+      FROM claims c
+      WHERE c.project_id = ?
+      ORDER BY c.created_at ASC
+    `).all(id);
+
+    const formatted = claims.map(c => ({
+      ...c,
+      evidence: c.evidence_json ? JSON.parse(c.evidence_json) : []
+    }));
+
+    res.json({
+      projectId: id,
+      total: formatted.length,
+      claims: formatted
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 
 router.post('/projects/load-demo', handleLoadDemo);
 router.post('/demo/load', handleLoadDemo);
