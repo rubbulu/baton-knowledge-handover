@@ -311,133 +311,164 @@ router.get('/projects/:id/chunks', (req, res) => {
 });
 
 /**
- * POST /api/projects/load-demo
+ * Core Demo Data Seeding Logic
+ * Creates the CodeCraft Club project from /demo-data
+ */
+export function runDemoSeeding(db) {
+  const demoDir = path.resolve(__dirname, '../../demo-data');
+
+  if (!fs.existsSync(demoDir)) {
+    throw new Error(`Demo data directory not found at ${demoDir}`);
+  }
+
+  const demoFilesConfig = [
+    {
+      filename: 'meeting-notes-0314.md',
+      accessLabel: 'team',
+      type: 'notes'
+    },
+    {
+      filename: 'team-chat.txt',
+      accessLabel: 'leads-only',
+      type: 'chat'
+    },
+    {
+      filename: 'tasks.csv',
+      accessLabel: 'team',
+      type: 'tasks'
+    },
+    {
+      filename: 'confidential-chat.txt',
+      accessLabel: 'confidential',
+      type: 'chat'
+    }
+  ];
+
+  const projectId = crypto.randomUUID();
+  const projectName = 'CodeCraft Club Handover (Arjun -> Priya)';
+  const projectDesc = 'Comprehensive knowledge handover for CodeCraft Club. Arjun Mehta (outgoing lead) transferring architecture, API keys, credentials, event planning, and private club finances to incoming president Priya Sharma.';
+
+  let totalChunksCount = 0;
+  const createdSources = [];
+
+  const loadDemoTx = db.transaction(() => {
+    // 1. Create Project
+    db.prepare(`
+      INSERT INTO projects (id, name, description, created_at, updated_at)
+      VALUES (?, ?, ?, datetime('now'), datetime('now'))
+    `).run(projectId, projectName, projectDesc);
+
+    // 2. Ingest and Chunk each demo file
+    for (const config of demoFilesConfig) {
+      const filePath = path.join(demoDir, config.filename);
+      if (!fs.existsSync(filePath)) {
+        console.warn(`[DemoLoader] Warning: File ${config.filename} not found in ${demoDir}`);
+        continue;
+      }
+
+      const rawContent = fs.readFileSync(filePath, 'utf-8');
+      const sourceId = crypto.randomUUID();
+
+      db.prepare(`
+        INSERT INTO sources (id, project_id, name, type, access_label, raw_content, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, datetime('now'))
+      `).run(sourceId, projectId, config.filename, config.type, config.accessLabel, rawContent);
+
+      const chunks = chunkSource({
+        content: rawContent,
+        filename: config.filename,
+        type: config.type,
+        accessLabel: config.accessLabel,
+        sourceId
+      });
+
+      const insertChunkStmt = db.prepare(`
+        INSERT INTO chunks (id, source_id, author, timestamp, text, access_label, line_ref, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'))
+      `);
+
+      for (const chunk of chunks) {
+        insertChunkStmt.run(
+          chunk.id,
+          chunk.source_id,
+          chunk.author || null,
+          chunk.timestamp || null,
+          chunk.text,
+          chunk.access_label,
+          chunk.line_ref
+        );
+      }
+
+      totalChunksCount += chunks.length;
+      createdSources.push({
+        sourceId,
+        name: config.filename,
+        type: config.type,
+        accessLabel: config.accessLabel,
+        chunksCount: chunks.length
+      });
+    }
+
+    // 3. Audit Log
+    db.prepare(`
+      INSERT INTO audit_log (id, project_id, action, actor, details, created_at)
+      VALUES (?, ?, ?, ?, ?, datetime('now'))
+    `).run(
+      crypto.randomUUID(),
+      projectId,
+      'load_demo_project',
+      'system',
+      `Loaded CodeCraft Club demo data: ${createdSources.length} sources, ${totalChunksCount} chunks`
+    );
+  });
+
+  loadDemoTx();
+
+  const project = db.prepare('SELECT * FROM projects WHERE id = ?').get(projectId);
+
+  return {
+    project,
+    projectId,
+    projectName,
+    sources: createdSources,
+    totalChunks: totalChunksCount
+  };
+}
+
+/**
+ * Seeds the demo project on startup if database has no projects
+ */
+export function seedDemoProjectIfEmpty(db) {
+  try {
+    const existing = db.prepare('SELECT COUNT(*) as count FROM projects').get();
+    if (existing && existing.count > 0) {
+      return null;
+    }
+
+    console.log('[Baton Auto-Seed] Database is empty. Auto-seeding CodeCraft Club demo project...');
+    const result = runDemoSeeding(db);
+    console.log(`[Baton Auto-Seed] Done! Auto-seeded demo project "${result.projectName}" (${result.totalChunks} chunks).`);
+    return result;
+  } catch (err) {
+    console.warn('[Baton Auto-Seed] Startup seeding notice:', err.message);
+    return null;
+  }
+}
+
+/**
+ * Endpoint handler: Load demo project
  * Also aliased as POST /api/demo/load
- * Creates a project from /demo-data with:
- *   meeting-notes-0314.md = team
- *   team-chat.txt         = leads-only
- *   tasks.csv             = team
- *   confidential-chat.txt = confidential
  */
 async function handleLoadDemo(req, res) {
   try {
     const db = getDb();
-    const demoDir = path.resolve(__dirname, '../../demo-data');
-
-    if (!fs.existsSync(demoDir)) {
-      return res.status(404).json({ error: `Demo data directory not found at ${demoDir}` });
-    }
-
-    const demoFilesConfig = [
-      {
-        filename: 'meeting-notes-0314.md',
-        accessLabel: 'team',
-        type: 'notes'
-      },
-      {
-        filename: 'team-chat.txt',
-        accessLabel: 'leads-only',
-        type: 'chat'
-      },
-      {
-        filename: 'tasks.csv',
-        accessLabel: 'team',
-        type: 'tasks'
-      },
-      {
-        filename: 'confidential-chat.txt',
-        accessLabel: 'confidential',
-        type: 'chat'
-      }
-    ];
-
-    const projectId = crypto.randomUUID();
-    const projectName = 'CodeCraft Club Handover (Arjun -> Priya)';
-    const projectDesc = 'Comprehensive knowledge handover for CodeCraft Club. Arjun Mehta (outgoing lead) transferring architecture, API keys, credentials, event planning, and private club finances to incoming president Priya Sharma.';
-
-    let totalChunksCount = 0;
-    const createdSources = [];
-
-    const loadDemoTx = db.transaction(() => {
-      // 1. Create Project
-      db.prepare(`
-        INSERT INTO projects (id, name, description, created_at, updated_at)
-        VALUES (?, ?, ?, datetime('now'), datetime('now'))
-      `).run(projectId, projectName, projectDesc);
-
-      // 2. Ingest and Chunk each demo file
-      for (const config of demoFilesConfig) {
-        const filePath = path.join(demoDir, config.filename);
-        if (!fs.existsSync(filePath)) {
-          console.warn(`[DemoLoader] Warning: File ${config.filename} not found in ${demoDir}`);
-          continue;
-        }
-
-        const rawContent = fs.readFileSync(filePath, 'utf-8');
-        const sourceId = crypto.randomUUID();
-
-        db.prepare(`
-          INSERT INTO sources (id, project_id, name, type, access_label, raw_content, created_at)
-          VALUES (?, ?, ?, ?, ?, ?, datetime('now'))
-        `).run(sourceId, projectId, config.filename, config.type, config.accessLabel, rawContent);
-
-        const chunks = chunkSource({
-          content: rawContent,
-          filename: config.filename,
-          type: config.type,
-          accessLabel: config.accessLabel,
-          sourceId
-        });
-
-        const insertChunkStmt = db.prepare(`
-          INSERT INTO chunks (id, source_id, author, timestamp, text, access_label, line_ref, created_at)
-          VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'))
-        `);
-
-        for (const chunk of chunks) {
-          insertChunkStmt.run(
-            chunk.id,
-            chunk.source_id,
-            chunk.author || null,
-            chunk.timestamp || null,
-            chunk.text,
-            chunk.access_label,
-            chunk.line_ref
-          );
-        }
-
-        totalChunksCount += chunks.length;
-        createdSources.push({
-          sourceId,
-          name: config.filename,
-          type: config.type,
-          accessLabel: config.accessLabel,
-          chunksCount: chunks.length
-        });
-      }
-
-      // 3. Audit Log
-      db.prepare(`
-        INSERT INTO audit_log (id, project_id, action, actor, details, created_at)
-        VALUES (?, ?, ?, ?, ?, datetime('now'))
-      `).run(
-        crypto.randomUUID(),
-        projectId,
-        'load_demo_project',
-        'system',
-        `Loaded CodeCraft Club demo data: ${createdSources.length} sources, ${totalChunksCount} chunks`
-      );
-    });
-
-    loadDemoTx();
-
-    const project = db.prepare('SELECT * FROM projects WHERE id = ?').get(projectId);
+    const result = runDemoSeeding(db);
 
     res.status(201).json({
       message: 'Demo project loaded and chunked successfully',
-      project,
-      sources: createdSources,
-      totalChunks: totalChunksCount
+      project: result.project,
+      sources: result.sources,
+      totalChunks: result.totalChunks
     });
   } catch (err) {
     res.status(500).json({ error: err.message });

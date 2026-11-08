@@ -5,7 +5,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
 import { getDb, getDbType } from './db.js';
-import apiRouter from './routes.js';
+import apiRouter, { seedDemoProjectIfEmpty } from './routes.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -17,6 +17,9 @@ dotenv.config();
 // Auto-initialize SQLite database on start
 const db = getDb();
 console.log(`[Baton DB] SQLite initialized (driver: ${getDbType()})`);
+
+// Auto-seed demo project on startup if database is empty
+seedDemoProjectIfEmpty(db);
 
 const app = express();
 const PORT = process.env.PORT || 5000;

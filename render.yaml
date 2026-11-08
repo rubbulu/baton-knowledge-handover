@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: baton-knowledge-handover
+    env: node
+    plan: free
+    region: oregon
+    buildCommand: npm run install:all && npm run build
+    startCommand: npm start
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: USE_CACHE
+        value: "true"
+      - key: DATABASE_PATH
+        value: ./server/data/baton.db
+      - key: GEMINI_API_KEY
+        sync: false

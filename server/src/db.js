@@ -20,12 +20,21 @@ export function getDb(customPath = null) {
     return dbInstance;
   }
 
-  const dbDir = path.resolve(__dirname, '../data');
-  if (!fs.existsSync(dbDir)) {
-    fs.mkdirSync(dbDir, { recursive: true });
+  const configuredPath = customPath || process.env.DATABASE_PATH || process.env.SQLITE_PATH;
+  let dbFilePath;
+  if (configuredPath) {
+    dbFilePath = path.resolve(configuredPath);
+    const parentDir = path.dirname(dbFilePath);
+    if (!fs.existsSync(parentDir)) {
+      fs.mkdirSync(parentDir, { recursive: true });
+    }
+  } else {
+    const dbDir = path.resolve(__dirname, '../data');
+    if (!fs.existsSync(dbDir)) {
+      fs.mkdirSync(dbDir, { recursive: true });
+    }
+    dbFilePath = path.join(dbDir, 'baton.db');
   }
-
-  const dbFilePath = customPath || path.join(dbDir, 'baton.db');
 
   try {
     // 1. Try better-sqlite3 first
