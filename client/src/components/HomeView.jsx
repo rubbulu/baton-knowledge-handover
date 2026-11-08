@@ -128,6 +128,49 @@ export default function HomeView({ onSelectProject }) {
           Turn project notes, chat exports, and task boards into structured, verified claims with exact source quotes.
         </p>
 
+        {/* In-App "How It Works" Strip: Upload -> Reconstruct -> Review -> Handover */}
+        <div className="how-it-works-container" aria-label="How Baton Works Workflow">
+          <div className="how-it-works-strip">
+            <div className="how-step">
+              <div className="how-step-badge">1</div>
+              <div className="how-step-body">
+                <span className="how-step-title">📁 Upload</span>
+                <p className="how-step-desc">Notes, chat & tasks with access labels</p>
+              </div>
+            </div>
+
+            <div className="how-step-arrow" aria-hidden="true">&rarr;</div>
+
+            <div className="how-step">
+              <div className="how-step-badge">2</div>
+              <div className="how-step-body">
+                <span className="how-step-title">⚡ Reconstruct</span>
+                <p className="how-step-desc">Extract claims & verify exact quotes</p>
+              </div>
+            </div>
+
+            <div className="how-step-arrow" aria-hidden="true">&rarr;</div>
+
+            <div className="how-step">
+              <div className="how-step-badge">3</div>
+              <div className="how-step-body">
+                <span className="how-step-title">🔍 Review</span>
+                <p className="how-step-desc">Resolve conflicts & confirm claims</p>
+              </div>
+            </div>
+
+            <div className="how-step-arrow" aria-hidden="true">&rarr;</div>
+
+            <div className="how-step">
+              <div className="how-step-badge">4</div>
+              <div className="how-step-body">
+                <span className="how-step-title">🤝 Handover</span>
+                <p className="how-step-desc">Role-based snapshot & redaction</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Demo Project CTA */}
         <div className="demo-cta-card">
           <div className="demo-cta-content">

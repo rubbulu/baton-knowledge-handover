@@ -90,7 +90,10 @@ export const api = {
     apiFetch(`/api/projects/${projectId}/approve`, { method: 'POST', body: { approve_all: approveAll } }),
 
   acknowledgeHandover: (projectId, data = {}) =>
-    apiFetch(`/api/projects/${projectId}/acknowledge`, { method: 'POST', body: data })
+    apiFetch(`/api/projects/${projectId}/acknowledge`, { method: 'POST', body: data }),
+
+  getAcknowledgements: (projectId) =>
+    apiFetch(`/api/projects/${projectId}/acknowledgements`)
 };
 
 export default api;

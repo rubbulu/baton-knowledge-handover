@@ -1035,7 +1035,8 @@ router.get('/projects/:id/handover', (req, res) => {
       version: currentVersion,
       totalApproved: roleClaims.length,
       groups,
-      next_actions: nextActions
+      next_actions: nextActions,
+      nextActions: nextActions
     });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -1084,6 +1085,25 @@ router.post('/projects/:id/acknowledge', (req, res) => {
       version_num: version_num || 'latest',
       acknowledged_at: new Date().toISOString()
     });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * GET /api/projects/:id/acknowledgements
+ * Retrieve all acknowledgements recorded for this project
+ */
+router.get('/projects/:id/acknowledgements', (req, res) => {
+  try {
+    const { id } = req.params;
+    const db = getDb();
+    const acknowledgements = db.prepare(`
+      SELECT * FROM acknowledgements
+      WHERE project_id = ?
+      ORDER BY acknowledged_at DESC
+    `).all(id);
+    res.json({ acknowledgements });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
