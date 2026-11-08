@@ -3,11 +3,15 @@
   "version": "0.1.0",
   "private": true,
   "description": "Baton - A structured knowledge-handover tool turning messy docs, chats, and task boards into verified claims with source quotes.",
+  "engines": {
+    "node": ">=22.0.0"
+  },
   "scripts": {
     "dev": "npx --yes concurrently \"npm run dev --prefix server\" \"npm run dev --prefix client\"",
-    "build": "npm run build --prefix client",
-    "start": "npm run start --prefix server",
-    "install:all": "npm install --prefix server && npm install --prefix client"
+    "postinstall": "npm run install:all",
+    "install:all": "npm install --prefix server --include=dev && npm install --prefix client --include=dev",
+    "build": "npm run install:all && npm run build --prefix client",
+    "start": "node server/src/index.js"
   },
   "devDependencies": {
     "concurrently": "^9.1.2"
