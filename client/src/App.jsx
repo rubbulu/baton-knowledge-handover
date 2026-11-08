@@ -25,7 +25,6 @@ export default function App() {
           <div className="logo">
             <span>🏃‍♂️</span>
             <span>Baton</span>
-            <span className="badge">Round 2</span>
           </div>
           <div className="status-indicator">
             <span className={`status-dot ${serverHealth ? 'online' : ''}`}></span>
