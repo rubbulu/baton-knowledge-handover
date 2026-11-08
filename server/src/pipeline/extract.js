@@ -106,18 +106,18 @@ export async function extractProjectClaims(projectId, options = {}) {
   }
 
   const isDemoProject = (project.name && project.name.includes('CodeCraft Club')) || projectId.startsWith('demo-');
-  const forceCache = options.useCache === true || process.env.USE_CACHE === 'true';
+  const preferCache = options.useCache === true || process.env.USE_CACHE === 'true' || (isDemoProject && process.env.USE_LIVE_API !== 'true');
 
   let rawClaims = [];
   let extractionSource = 'live_api';
 
   // 3. Check if cached demo extraction should be used directly
-  if (forceCache && fs.existsSync(CACHE_FILE_PATH)) {
+  if (preferCache && fs.existsSync(CACHE_FILE_PATH)) {
     try {
       const cachedData = JSON.parse(fs.readFileSync(CACHE_FILE_PATH, 'utf-8'));
       rawClaims = cachedData.claims || [];
-      extractionSource = 'cache_configured';
-      console.log(`[Extraction] Extracted ${rawClaims.length} claims via cached demo-extraction.json (USE_CACHE=true)`);
+      extractionSource = isDemoProject ? 'cache_demo' : 'cache_configured';
+      console.log(`[Extraction] Extracted ${rawClaims.length} claims via demo cache (${extractionSource})`);
     } catch (err) {
       console.warn(`[Extraction] Failed to read cache file: ${err.message}. Proceeding to live API...`);
     }

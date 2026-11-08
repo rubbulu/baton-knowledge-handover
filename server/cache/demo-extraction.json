@@ -1,5 +1,5 @@
 {
-  "cachedAt": "2026-11-08T15:40:51.519Z",
+  "cachedAt": "2026-11-08T16:29:59.262Z",
   "allowedLabels": [
     "team",
     "leads-only",
@@ -7,10 +7,28 @@
   ],
   "claims": [
     {
-      "type": "decision",
-      "text": "Draw ₹15,000 from the emergency reserve fund to cover the AWS server bill deficit, and deny individual commission to Rohan and Vikram from the DevFest title sponsor.",
+      "type": "risk",
+      "text": "The alumni server ran unauthorized benchmarking jobs, causing the AWS bill to come out to ₹18,400 instead of the usual ₹3,400 budget.",
       "chunk_ids": [
-        "70bd84b7-6fbd-4303-8706-73dadb446812"
+        "deddf482-9ed7-4812-9e38-ce8aae04d317"
+      ],
+      "quote": "The alumni server ran unauthorized benchmarking jobs last month, and the bill came out to ₹18,400 instead of our usual ₹3,400 budget.",
+      "owner": null
+    },
+    {
+      "type": "risk",
+      "text": "Rohan and Vikram had a major dispute over the DevFest corporate title sponsorship regarding commission and referral cuts.",
+      "chunk_ids": [
+        "89338086-1a51-4440-a61c-ef6db161cf66"
+      ],
+      "quote": "On top of that, Rohan and Vikram had a major dispute over the DevFest corporate title sponsorship. Rohan claims he brought in the sponsor and demanded a 10% referral cut, while Vikram says it was through his brother's company.",
+      "owner": null
+    },
+    {
+      "type": "decision",
+      "text": "The team will draw ₹15,000 from the emergency reserve fund to cover the AWS server bill deficit, and neither Rohan nor Vikram will receive individual commission from the DevFest title sponsor.",
+      "chunk_ids": [
+        "6e5981d2-ee36-43d8-9b8f-baf1a9fec78a"
       ],
       "quote": "Decision: We will draw ₹15,000 from the emergency reserve fund to cover the AWS server bill deficit, and neither Rohan nor Vikram will receive individual commission from the DevFest title sponsor to keep accounts transparent.",
       "owner": null
@@ -19,7 +37,7 @@
       "type": "task",
       "text": "Process the emergency fund transfer tomorrow with Dr. Raman's private clearance.",
       "chunk_ids": [
-        "9377b777-9a53-42b1-8367-db18768d98fb"
+        "dd4fe306-83d0-48f0-ab56-a67a69d691ab"
       ],
       "quote": "I will process the emergency fund transfer tomorrow with Dr. Raman's private clearance.",
       "owner": "Sneha Patel"
@@ -28,7 +46,7 @@
       "type": "task",
       "text": "Speak to both Rohan and Vikram separately tomorrow so tensions cool down without making it public.",
       "chunk_ids": [
-        "f25c274e-c9fd-488b-bc8c-a9b1e0092ac2"
+        "a6a25f82-3c80-443a-8580-11ddd1115697"
       ],
       "quote": "I will speak to both Rohan and Vikram separately tomorrow so tensions cool down without making it public.",
       "owner": "Priya Sharma"
@@ -37,241 +55,205 @@
       "type": "decision",
       "text": "Migrate the club registration and project showcase portal from Django to Next.js hosted on Vercel to handle traffic spikes during HackSprint.",
       "chunk_ids": [
-        "fd287fe5-60ad-4eab-995c-f4f7a5a3443b"
+        "9d49d5ad-1b2d-44ae-92ee-5db7cd925ba8"
       ],
-      "quote": "Decision: Migrate the club registration and project showcase portal from Django to Next.js hosted on Vercel to handle traffic spikes during HackSprint.",
+      "quote": "- Decision: Migrate the club registration and project showcase portal from Django to Next.js hosted on Vercel to handle traffic spikes during HackSprint.",
       "owner": null
     },
     {
-      "type": "decision",
+      "type": "dependency",
       "text": "All code repositories must enforce branch protection on main with at least 1 mandatory review from Priya.",
       "chunk_ids": [
-        "4e1aa57a-19fe-4c92-ad90-716f4faf645f"
+        "292f22f3-a524-423c-b234-3e894725f4a5"
       ],
-      "quote": "All code repositories must enforce branch protection on `main` with at least 1 mandatory review from Priya.",
+      "quote": "- All code repositories must enforce branch protection on `main` with at least 1 mandatory review from Priya.",
       "owner": "Priya Sharma"
     },
     {
       "type": "owner",
       "text": "Cloud infrastructure (AWS / Supabase) ownership.",
       "chunk_ids": [
-        "f98f2c0c-a77d-41b0-a235-648b597f970a"
+        "ff0d45ce-6349-485c-b7fd-106bae6e7ad3"
       ],
-      "quote": "Cloud infrastructure (AWS / Supabase): Vikram Aditya",
+      "quote": "- Cloud infrastructure (AWS / Supabase): Vikram Aditya",
       "owner": "Vikram Aditya"
     },
     {
       "type": "owner",
       "text": "Finance & Budget Accounts ownership.",
       "chunk_ids": [
-        "43d7f366-88a6-41b0-9b96-b23653368d5b"
+        "26368f7d-1628-4e69-aff9-831b2d42b869"
       ],
-      "quote": "Finance & Budget Accounts: Sneha Patel",
+      "quote": "- Finance & Budget Accounts: Sneha Patel",
       "owner": "Sneha Patel"
     },
     {
       "type": "owner",
       "text": "Hackathon Logistics & Venue Liaison ownership.",
       "chunk_ids": [
-        "12b1a412-f3be-4e4e-8484-a2c039d802be"
+        "72b5f596-73ed-4668-a257-1dcac3f3685e"
       ],
-      "quote": "Hackathon Logistics & Venue Liaison: Rohan Verma",
+      "quote": "- Hackathon Logistics & Venue Liaison: Rohan Verma",
       "owner": "Rohan Verma"
     },
     {
       "type": "owner",
-      "text": "Domain registrar Namecheap account for codecraftclub.org ownership.",
+      "text": "Domain registrar Namecheap account for codecraftclub.org managed and renewed until November 2027.",
       "chunk_ids": [
-        "db23a166-7825-4460-82ec-56a40fb0d266"
+        "d8008ded-986c-45e6-a6cd-5267f3de2e35"
       ],
-      "quote": "Domain registrar: Namecheap account for `codecraftclub.org`. Renewed until November 2027 by Arjun.",
+      "quote": "- Domain registrar: Namecheap account for `codecraftclub.org`. Renewed until November 2027 by Arjun.",
       "owner": "Arjun Mehta"
     },
     {
       "type": "dependency",
-      "text": "The internal attendance tracker is currently running on the Supabase free tier.",
+      "text": "Supabase free tier is used for the internal attendance tracker.",
       "chunk_ids": [
-        "b84769bb-b343-4834-9405-7e0eae8ae8bf"
+        "ffb47b75-cc2a-4a75-b632-0f2c561e5bb7"
       ],
       "quote": "- Database: Supabase free tier currently running for the internal attendance tracker.",
       "owner": null
     },
     {
       "type": "owner",
-      "text": "Priya owns and manages the Google Maps API billing account and API key under her Google Cloud Student account.",
+      "text": "Google Maps API billing account and API key are owned and managed by Priya.",
       "chunk_ids": [
-        "1edc476c-3686-4a6d-a6c9-a36b2402e0aa"
+        "49d01290-06e9-47b3-8d99-6664e67db5b7"
       ],
       "quote": "- Google Maps API billing account and API key is owned and managed by Priya under her Google Cloud Student account.",
       "owner": "Priya"
     },
     {
-      "type": "task",
-      "text": "Configure Postmark transactional email token in GitHub Secrets for hackathon notification emails.",
+      "type": "dependency",
+      "text": "Postmark transactional email token is configured in GitHub Secrets for hackathon notification emails.",
       "chunk_ids": [
-        "6b8a80bc-f266-4a23-ba94-1bd0bc3fbd21"
+        "6b021c97-713b-4649-9d93-a22280f27fc2"
       ],
       "quote": "- Postmark transactional email token is configured in GitHub Secrets for hackathon notification emails.",
       "owner": null
     },
     {
       "type": "recurring_problem",
-      "text": "The attendance bot crashes when Discord rate limits webhooks with HTTP 429 during general body announcements.",
+      "text": "The attendance bot crashes on Discord rate limits with HTTP 429 during general body announcements.",
       "chunk_ids": [
-        "b167a1fc-11cf-4fdf-987e-1d32e682b6cd"
+        "2fb494f0-f8a0-437c-b0a7-84ca1d9c98dc"
       ],
       "quote": "- The attendance bot crashes whenever Discord rate limits webhooks with HTTP 429 during general body announcements.",
       "owner": null
     },
     {
       "type": "risk",
-      "text": "Only Arjun holds root console credentials to the AWS alumni server, creating a single point of failure.",
+      "text": "Only Arjun holds root console credentials to the AWS alumni server, representing a single point of failure.",
       "chunk_ids": [
-        "58805313-25b2-4375-948e-bbc408045fd6"
+        "ee0b4b87-9c71-45fa-8b6f-b205ecec5a3b"
       ],
-      "quote": "Single point of failure: Only Arjun holds root console credentials to the AWS alumni server. Need IAM delegation before April 15.",
+      "quote": "- Single point of failure: Only Arjun holds root console credentials to the AWS alumni server. Need IAM delegation before April 15.",
       "owner": "Arjun"
     },
     {
-      "type": "decision",
-      "text": "PrintExpress on MG Road will sponsor 500 event badges and hackathon stickers with a 15% discount using promo code CRAFT15.",
-      "chunk_ids": [
-        "cded7d4e-ffed-44d2-b1d1-569b3a341416"
-      ],
-      "quote": "- PrintExpress on MG Road will sponsor 500 event badges and hackathon stickers with a 15% discount using promo code CRAFT15.",
-      "owner": null
-    },
-    {
-      "type": "decision",
-      "text": "College auditorium booked for October 10-11, 2026 with permission from Dean of Student Affairs.",
-      "chunk_ids": [
-        "1e663286-8e68-4a09-a8a9-af8592fe8081"
-      ],
-      "quote": "- College auditorium booked for October 10-11, 2026 with permission from Dean of Student Affairs.",
-      "owner": null
-    },
-    {
-      "type": "decision",
-      "text": "Food catering shortlist narrowed to Campus Canteen and Annapurna Caterers with a deposit of ₹10,000 due by April 30.",
-      "chunk_ids": [
-        "fdef1de9-f50d-4787-8a1e-a9914c66bd3b"
-      ],
-      "quote": "- Food catering shortlist narrowed to Campus Canteen and Annapurna Caterers; deposit of ₹10,000 due by April 30.",
-      "owner": null
-    },
-    {
-      "type": "recurring_problem",
+      "type": "risk",
       "text": "College WiFi strictly blocks outgoing port 22 (SSH), causing issues during on-campus workshop sessions.",
       "chunk_ids": [
-        "d3f04465-3488-440b-ad09-015b3695a799"
+        "80c0abc2-2891-4070-9ef4-4f823064b38d"
       ],
       "quote": "- College WiFi strictly blocks outgoing port 22 (SSH), causing issues during on-campus workshop sessions.",
       "owner": null
     },
     {
-      "type": "dependency",
-      "text": "Students without laptops must be paired with lab machines, which require IT department administrative override.",
-      "chunk_ids": [
-        "01092fe3-8ecf-49b4-b7af-d7cdb10009f1"
-      ],
-      "quote": "- Students without laptops must be paired with lab machines, which require IT department administrative override.",
-      "owner": null
-    },
-    {
       "type": "task",
-      "text": "Transfer GitHub Organization owner rights to Priya Sharma with mandatory 2FA.",
+      "text": "Transfer GitHub Organization owner rights.",
       "chunk_ids": [
-        "075eb5fa-cc26-49c7-9bed-aaaacd8931f5"
+        "dd7670f0-c13b-4766-86ad-52960794bc18"
       ],
       "quote": "[TASK-01] Transfer GitHub Organization owner rights | Category: Admin | Status: Done | Owner: Arjun Mehta | Notes: Transferred admin rights to Priya Sharma with mandatory 2FA",
       "owner": "Arjun Mehta"
     },
     {
       "type": "task",
-      "text": "Next.js frontend migration for hackathon portal, migrating from legacy Django backend to Next.js on Vercel.",
+      "text": "Next.js frontend migration for hackathon portal.",
       "chunk_ids": [
-        "7f296bf1-2f1e-4d3f-8ba3-ea0010583393"
+        "0635649b-633d-423c-a041-f11ea5172891"
       ],
       "quote": "[TASK-02] Next.js frontend migration for hackathon portal | Category: Engineering | Status: In Progress | Owner: Priya Sharma | Notes: Migrate from legacy Django backend to Next.js on Vercel",
       "owner": "Priya Sharma"
     },
     {
       "type": "task",
-      "text": "Setup Vercel auto-deploy pipeline for pull requests by configuring GitHub Action workflow for preview deployments.",
+      "text": "Setup Vercel auto-deploy pipeline for pull requests.",
       "chunk_ids": [
-        "d597234a-343b-4af2-81e9-a3d8c4779b9b"
+        "206da1be-5556-4010-84cd-d2b29f246154"
       ],
       "quote": "[TASK-03] Setup Vercel auto-deploy pipeline for pull requests | Category: DevOps | Status: Done | Owner: Vikram Aditya | Dependencies: TASK-02 | Notes: Configured GitHub Action workflow for preview deployments",
       "owner": "Vikram Aditya"
     },
     {
       "type": "task",
-      "text": "Audit and migrate Google Maps API billing account, transitioning GCP billing account from Arjun before graduation.",
+      "text": "Audit and migrate Google Maps API billing account.",
       "chunk_ids": [
-        "b7a94f11-8e81-459c-a1c7-8c6f6634c908"
+        "e6d2c031-bd29-4e90-8773-aab2dadf8809"
       ],
       "quote": "[TASK-04] Audit and migrate Google Maps API billing account | Category: Infra | Status: Blocked | Owner: Priya Sharma | Notes: Need to transition GCP billing account from Arjun before graduation",
       "owner": "Priya Sharma"
     },
     {
       "type": "task",
-      "text": "Reserve University Main Auditorium for HackSprint, tentatively approved for Oct 10-11 by Dean of Student Affairs.",
+      "text": "Reserve University Main Auditorium for HackSprint.",
       "chunk_ids": [
-        "8206b8af-5edf-4e1e-9bed-c4438925a5fa"
+        "6604dfbb-bf9d-4751-860b-caf5d82bd3b9"
       ],
       "quote": "[TASK-05] Reserve University Main Auditorium for HackSprint | Category: Logistics | Status: Done | Owner: Rohan Verma | Notes: Tentatively approved for Oct 10-11 by Dean of Student Affairs",
       "owner": "Rohan Verma"
     },
     {
       "type": "task",
-      "text": "Finalize HackSprint 2026 sponsorship brochure with tiered packages from Title to Bronze sponsor tiers.",
+      "text": "Finalize HackSprint 2026 sponsorship brochure.",
       "chunk_ids": [
-        "f0a4a9f5-02f7-424c-9ac4-93fb40d7e75f"
+        "bd6775b4-9d92-46a7-92c4-7e705c3d14a7"
       ],
       "quote": "[TASK-06] Finalize HackSprint 2026 sponsorship brochure | Category: Design | Status: In Progress | Owner: Sneha Patel | Dependencies: TASK-05 | Notes: Tiered packages from Title to Bronze sponsor tiers",
       "owner": "Sneha Patel"
     },
     {
       "type": "task",
-      "text": "Setup Discord webhook rate-limit queue by implementing exponential backoff queue to stop HTTP 429 errors.",
+      "text": "Setup Discord webhook rate-limit queue.",
       "chunk_ids": [
-        "96b69091-53a4-4cd3-b314-2aaa17d15594"
+        "890cf72e-1d22-4f1a-9575-6858d96e8827"
       ],
       "quote": "[TASK-07] Setup Discord webhook rate-limit queue | Category: Engineering | Status: Todo | Owner: Vikram Aditya | Notes: Implement exponential backoff queue to stop HTTP 429 errors",
       "owner": "Vikram Aditya"
     },
     {
       "type": "task",
-      "text": "Inventory 8 ESP32 hardware kits in club cupboard, verified and stored in Lab Cabinet 3.",
+      "text": "Inventory 8 ESP32 hardware kits in club cupboard.",
       "chunk_ids": [
-        "6ec839f8-b29a-4a3f-a298-cf115ef1398f"
+        "de2febe3-07c4-44c9-b67c-ffee0f650a2e"
       ],
       "quote": "[TASK-08] Inventory 8 ESP32 hardware kits in club cupboard | Category: Logistics | Status: Done | Owner: Rohan Verma | Notes: Kits verified and stored in Lab Cabinet 3",
       "owner": "Rohan Verma"
     },
     {
       "type": "task",
-      "text": "Quarterly financial balance sheet audit with Faculty signed off by Faculty Advisor Dr. Raman Iyer.",
+      "text": "Quarterly financial balance sheet audit with Faculty.",
       "chunk_ids": [
-        "be330f50-4eda-44b4-801a-f1b47ecc27b2"
+        "618adc4e-1279-4531-93cc-2304c844def1"
       ],
       "quote": "[TASK-09] Quarterly financial balance sheet audit with Faculty | Category: Finance | Status: Done | Owner: Sneha Patel | Notes: Audit signed off by Faculty Advisor Dr. Raman Iyer",
       "owner": "Sneha Patel"
     },
     {
       "type": "task",
-      "text": "Prepare Git and GitHub workshop interactive repository with interactive git branch simulation exercises for juniors.",
+      "text": "Prepare Git and GitHub workshop interactive repository.",
       "chunk_ids": [
-        "d2d419c0-f377-4448-8338-89007b195f04"
+        "0a6d8d6d-e08b-492b-a19b-eade3cf9abad"
       ],
       "quote": "[TASK-10] Prepare Git and GitHub workshop interactive repository | Category: Education | Status: Todo | Owner: Priya Sharma | Notes: Interactive git branch simulation exercises for juniors",
       "owner": "Priya Sharma"
     },
     {
       "type": "task",
-      "text": "Docker and Containerization workshop lab guide providing hands-on lab sheet for Ubuntu 24.04 lab environments.",
+      "text": "Docker and Containerization workshop lab guide.",
       "chunk_ids": [
-        "57c4e9ae-c174-471c-add9-6412e31c0a88"
+        "460c5c00-88bc-4083-a23f-0fdfe495c80d"
       ],
       "quote": "[TASK-11] Docker and Containerization workshop lab guide | Category: Education | Status: Todo | Owner: Vikram Aditya | Notes: Hands-on lab sheet for Ubuntu 24.04 lab environments",
       "owner": "Vikram Aditya"
@@ -280,7 +262,7 @@
       "type": "task",
       "text": "Automate DNS failover and SSL renewals for codecraftclub.org",
       "chunk_ids": [
-        "52a6c8ae-bd48-4241-ad52-5ef08eb106fa"
+        "ec90fe76-5572-4a97-80f4-6a515bdf7d72"
       ],
       "quote": "[TASK-12] Automate DNS failover and SSL renewals for codecraftclub.org | Category: DevOps | Status: Todo | Owner: Unassigned | Notes: Crucial floating infrastructure task with no designated owner assigned",
       "owner": null
@@ -289,7 +271,7 @@
       "type": "task",
       "text": "Order event promotional badges and stickers",
       "chunk_ids": [
-        "4a9175b8-7621-4f92-b81c-a4f7057331ab"
+        "ef81bb6f-41e7-415e-8cd5-56e6d1156428"
       ],
       "quote": "[TASK-13] Order event promotional badges and stickers | Category: Marketing | Status: Todo | Owner: Sneha Patel | Notes: Waiting for quotation approval before placing order",
       "owner": "Sneha Patel"
@@ -298,7 +280,7 @@
       "type": "task",
       "text": "Supabase attendance tracker keepalive cron job",
       "chunk_ids": [
-        "1b55ea27-8970-4254-8d6c-a1d0cdbbab61"
+        "60fe2b65-2419-45d4-bbb0-5baea0a129c6"
       ],
       "quote": "[TASK-14] Supabase attendance tracker keepalive cron job | Category: DevOps | Status: Done | Owner: Vikram Aditya | Notes: Prevents free tier Supabase database pausing after 7 days",
       "owner": "Vikram Aditya"
@@ -307,117 +289,170 @@
       "type": "task",
       "text": "Draft mentor and judge invitation list for HackSprint",
       "chunk_ids": [
-        "9e253884-229a-4e73-9f97-f0f075732b7b"
+        "2ff12be3-36ca-4e5a-accb-67b199b8364b"
       ],
       "quote": "[TASK-15] Draft mentor and judge invitation list for HackSprint | Category: Logistics | Status: Todo | Owner: Rohan Verma | Dependencies: TASK-05 | Notes: Outreach to alumni working at top tech firms in Bengaluru",
       "owner": "Rohan Verma"
     },
     {
+      "type": "risk",
+      "text": "Arjun Mehta's final semester exams start next month, accelerating the club handover",
+      "chunk_ids": [
+        "67e85a4d-6c4b-449f-917f-155466fd31cc"
+      ],
+      "quote": "Morning team! As you know, my final semester exams start next month, so we are accelerating the club handover.",
+      "owner": "Arjun Mehta"
+    },
+    {
+      "type": "task",
+      "text": "Review AWS IAM policies to cut down permissions",
+      "chunk_ids": [
+        "59d4acb6-2f0b-49d6-b521-a47f75b0692e"
+      ],
+      "quote": "Hey folks, will review AWS IAM policies today so we can cut down permissions.",
+      "owner": "Vikram Aditya"
+    },
+    {
       "type": "decision",
       "text": "Migrate the club registration and project showcase portal from Django to Next.js hosted on Vercel",
       "chunk_ids": [
-        "9f3fb742-ec4b-4396-8074-6960800f2bb8"
+        "c7c8337d-2a46-477f-8b4a-c4403df92260"
       ],
       "quote": "The consensus was solid: We decided to migrate the club registration and project showcase portal from Django to Next.js hosted on Vercel to handle traffic spikes during HackSprint.",
       "owner": null
     },
     {
-      "type": "owner",
-      "text": "Google Maps API billing account is on Arjun Mehta's personal GCP console and credit card",
+      "type": "task",
+      "text": "Follow up with Dr. Raman after his 2 PM lecture regarding auditorium approval",
       "chunk_ids": [
-        "edbefb1e-29ef-40e9-a80a-61d51bfb4b36"
+        "d6814d6b-3e2f-4005-911a-25c83ef50ec6"
       ],
-      "quote": "Just confirming, the Google Maps API key is on my personal GCP console and credit card, so whoever takes over needs to swap it before I lose university email access.",
-      "owner": "Arjun Mehta"
+      "quote": "Perfect, I will follow up with Dr. Raman after his 2 PM lecture.",
+      "owner": "Rohan Verma"
     },
     {
       "type": "recurring_problem",
-      "text": "Discord bot threw 429 rate-limit errors during workshop broadcast",
+      "text": "Discord bot throws 429 rate-limit errors during workshop broadcasts when channel webhooks are spammed all at once",
       "chunk_ids": [
-        "d2eaeb6c-66f6-4d5c-8175-bb8b2dd6f069",
-        "7d78d0e4-412c-4834-bb9e-1733c2a24a0f"
+        "a78ed80f-6d07-4651-9890-1cb46e4fad09",
+        "bc574ec3-d7f3-4fd6-8358-588777d92a01"
       ],
       "quote": "Yeah, that's a known pain point. Discord aggressively rate-limits when we spam channel webhooks all at once.",
       "owner": null
     },
     {
       "type": "owner",
-      "text": "Priya Sharma is the GitHub Organization admin.",
+      "text": "Google Maps API key is on Arjun Mehta's personal GCP console and credit card",
       "chunk_ids": [
-        "fe798e5b-3b09-49c6-acd0-a811045d28e2",
-        "9ce0624e-3b77-499b-b9c0-d832db563a09"
+        "33015d68-8bbe-4c27-a123-ca7ae92f339a"
+      ],
+      "quote": "Just confirming, the Google Maps API key is on my personal GCP console and credit card, so whoever takes over needs to swap it before I lose university email access.",
+      "owner": "Arjun Mehta"
+    },
+    {
+      "type": "task",
+      "text": "Draft the sponsorship brochure by the end of the month.",
+      "chunk_ids": [
+        "beaa4d76-bcb7-4b57-a44c-a94e80635ac8"
+      ],
+      "quote": "We need to draft the sponsorship brochure by end of this month.",
+      "owner": null
+    },
+    {
+      "type": "owner",
+      "text": "Priya is the GitHub Organization admin.",
+      "chunk_ids": [
+        "f64c0bab-8101-4320-af4b-ae2e37457120"
       ],
       "quote": "Heads up: I'm transferring the GitHub Organization admin role to Priya today.",
       "owner": "Priya Sharma"
     },
     {
-      "type": "risk",
-      "text": "The Supabase free tier running the attendance DB pauses after 7 days of inactivity.",
+      "type": "decision",
+      "text": "Mandatory 2FA was enabled across all organization members.",
       "chunk_ids": [
-        "a3a74785-4e9c-4ca8-9958-1bb3ca5990b8"
+        "4e5e975b-f3e8-445e-8136-e0e378ad998c"
+      ],
+      "quote": "Accepted and enabled mandatory 2FA across all org members.",
+      "owner": "Priya Sharma"
+    },
+    {
+      "type": "risk",
+      "text": "The Supabase free tier hosting the attendance DB pauses after 7 days of inactivity.",
+      "chunk_ids": [
+        "6f82119c-1a74-4e4a-b57e-4834d20a526d"
       ],
       "quote": "Supabase free tier currently runs our attendance DB, but note that it pauses after 7 days of inactivity.",
       "owner": null
     },
     {
       "type": "task",
-      "text": "Vikram Aditya wrote a cron ping to keep the Supabase project active.",
+      "text": "A tiny cron ping was written to keep the project active so the database doesn't sleep.",
       "chunk_ids": [
-        "84e271c5-072f-477f-97a9-f961b3027deb"
+        "3050843c-a68d-4ad7-8499-3bc04911ae5f"
       ],
       "quote": "I wrote a tiny cron ping to keep the project active so it doesn't sleep.",
       "owner": "Vikram Aditya"
     },
     {
-      "type": "owner",
-      "text": "Vikram Aditya is taking the Docker and basic containerization workshop session.",
+      "type": "task",
+      "text": "Vikram Aditya is taking the Docker and basic containerization session for the upcoming sprint.",
       "chunk_ids": [
-        "c5995c2c-c4fe-4ac6-a5b7-0e7b51f77929"
+        "7adf735d-9e7d-4d5f-b084-570b587d1dc4"
       ],
       "quote": "I can take Docker and basic containerization.",
       "owner": "Vikram Aditya"
     },
     {
-      "type": "owner",
-      "text": "Priya Sharma is taking the Git/GitHub workshop session.",
+      "type": "task",
+      "text": "Priya is taking the Git/GitHub session for incoming members.",
       "chunk_ids": [
-        "64b0bfb3-8cb9-41e8-9f60-500c30c07218"
+        "d7e814e6-eaaa-4d1e-bba2-2dd71cbaea23"
       ],
       "quote": "Sounds great, I'll prepare the interactive repo examples.",
       "owner": "Priya Sharma"
     },
     {
-      "type": "task",
-      "text": "Configure automated DNS failover for codecraftclub.org.",
+      "type": "recurring_problem",
+      "text": "An annual debit card maintenance charge of ₹500 occurs every March from SBI.",
       "chunk_ids": [
-        "a6cd203e-9882-4528-a4fc-ea88eb1a76dc"
+        "5193b6ab-a13b-421a-a3e1-5c3dc1deddbe"
+      ],
+      "quote": "That's the annual debit card maintenance charge from SBI. Happens every March.",
+      "owner": null
+    },
+    {
+      "type": "task",
+      "text": "Configure automated DNS failover for codecraftclub.org domain on Namecheap.",
+      "chunk_ids": [
+        "04ed036b-a6e6-444a-b8f4-2255ac792717"
       ],
       "quote": "The domain is on Namecheap, but nobody has configured automated DNS failover yet. That's a floating task.",
       "owner": null
     },
     {
       "type": "task",
-      "text": "Sneha Patel sent the revised balance sheet to Dr. Raman for a quarterly audit.",
+      "text": "Send the revised balance sheet to Dr. Raman for quarterly audit.",
       "chunk_ids": [
-        "3e8b978b-a4d7-42f7-8ee6-5eb401a19f6c"
+        "21b0178a-08c1-47b1-8e42-59c841c7f659"
       ],
       "quote": "Sent the revised balance sheet to Dr. Raman for quarterly audit.",
       "owner": "Sneha Patel"
     },
     {
       "type": "owner",
-      "text": "The key to the club cupboard is located in the lab drawer.",
+      "text": "Priya Sharma is leading the CodeCraft charge.",
       "chunk_ids": [
-        "d5aa90a6-86d3-451f-aefb-9ef15da755ec"
+        "cd118765-515c-426c-aa74-777edb6a6619"
       ],
-      "quote": "There are 8 ESP32 microcontrollers in the club cupboard, key is in the lab drawer.",
-      "owner": null
+      "quote": "Great momentum everyone. CodeCraft is in great hands with Priya leading the charge!",
+      "owner": "Priya Sharma"
     },
     {
       "type": "task",
       "text": "Rohan Verma will inventory the ESP32 microcontrollers tomorrow morning.",
       "chunk_ids": [
-        "3715572c-84c2-4a28-b224-2fa873cd5bed"
+        "1a1b9eda-2441-46d7-a426-cfe4b3a1bc1e"
       ],
       "quote": "Awesome, I will inventory them tomorrow morning.",
       "owner": "Rohan Verma"
@@ -426,19 +461,10 @@
       "type": "task",
       "text": "Vikram Aditya will pick up the Vercel staging deployment task.",
       "chunk_ids": [
-        "f684b931-df0b-4c48-ae16-0f493b2de145"
+        "3630b486-a17a-4e41-9b24-5b861b908ca9"
       ],
       "quote": "Reviewed. I will pick up the Vercel staging deployment task.",
       "owner": "Vikram Aditya"
-    },
-    {
-      "type": "owner",
-      "text": "Priya Sharma is leading CodeCraft.",
-      "chunk_ids": [
-        "bb722a83-683e-4cd3-9cd6-02c54a9aacf4"
-      ],
-      "quote": "Great momentum everyone. CodeCraft is in great hands with Priya leading the charge!",
-      "owner": "Priya Sharma"
     }
   ]
 }
