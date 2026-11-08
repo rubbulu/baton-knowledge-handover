@@ -882,6 +882,28 @@ router.post('/projects/:id/approve', requireLead, (req, res) => {
 });
 
 /**
+ * GET /api/projects/:id/versions
+ * Returns version snapshot history list
+ */
+router.get('/projects/:id/versions', (req, res) => {
+  try {
+    const { id } = req.params;
+    const db = getDb();
+    const versions = db.prepare(`
+      SELECT id, project_id, version_num, created_at,
+             json_extract(snapshot_json, '$.approvedBy') as approvedBy,
+             json_extract(snapshot_json, '$.claimsCount') as claimsCount
+      FROM versions
+      WHERE project_id = ?
+      ORDER BY version_num DESC
+    `).all(id);
+    res.json({ versions });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
  * GET /api/projects/:id/handover
  * Returns role-filtered approved claims grouped by type + code-generated next actions.
  * Handover views show ONLY approved claims.
